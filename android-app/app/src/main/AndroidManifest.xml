@@ -34,7 +34,7 @@
         android:label="Aurea"
         android:theme="@style/Theme.Aurea"
         android:networkSecurityConfig="@xml/network_security_config"
-        tools:targetApi="36">
+        tools:targetApi="35">
 
         <activity
             android:name=".ui.MainActivity"
