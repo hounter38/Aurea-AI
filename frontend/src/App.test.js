@@ -7,3 +7,8 @@ test("renders Aurea Dashboard header", () => {
   expect(header).toHaveTextContent("Aurea");
   expect(header).toHaveTextContent("Dashboard");
 });
+
+test("renders pipeline description", () => {
+  render(<App />);
+  expect(screen.getByText(/Simulate Incoming Message/i)).toBeInTheDocument();
+});
