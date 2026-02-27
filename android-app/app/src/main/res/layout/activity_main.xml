@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A0F">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aurea"
+            android:textColor="#C48B13"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="We remember so you don't have to"
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Checking status..."
+            android:textColor="#CCCCCC"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:background="#1A1A2E"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/serverStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Server: Checking..."
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:padding="12dp"
+            android:background="#1A1A2E"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Actions -->
+        <Button
+            android:id="@+id/permissionBtn"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Grant All Permissions"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#C48B13"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/defaultSmsBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Set as Default SMS App (optional)"
+            android:textColor="#C48B13"
+            android:backgroundTint="#1A1A2E"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/checkServerBtn"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Check Server Connection"
+            android:textColor="#C48B13"
+            android:backgroundTint="#1A1A2E"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Activity Log -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Activity Log"
+            android:textColor="#C48B13"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/logText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="200dp"
+            android:text=""
+            android:textColor="#888888"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:padding="12dp"
+            android:background="#111122"
+            android:lineSpacingExtra="4dp" />
+
+    </LinearLayout>
+</ScrollView>
