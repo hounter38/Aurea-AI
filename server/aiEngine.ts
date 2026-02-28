@@ -21,20 +21,33 @@ export interface ParsedEvent {
 
 function mockParse(messageText: string): ParsedEvent | null {
   const lower = messageText.toLowerCase();
-  const hasIntent = /\b(meet|meeting|call|appointment|lunch|dinner|coffee|event|schedule|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(lower);
+  const now = new Date();
+
+  const timeMatch = messageText.match(/(\d{1,2}):?(\d{2})?\s*(am|pm)/i);
+  const dateMatch = messageText.match(/(\w+ \d{1,2})/i);
+  let dt = new Date(now.getTime() + 86400000);
+  if (dateMatch) { const p = new Date(`${dateMatch[1]} ${now.getFullYear()}`); if (!isNaN(p.getTime())) dt = p; }
+  if (timeMatch) { let h = parseInt(timeMatch[1]); const m = timeMatch[2] ? parseInt(timeMatch[2]) : 0; if (timeMatch[3].toLowerCase() === "pm" && h < 12) h += 12; dt.setHours(h, m, 0, 0); }
+
+  if (lower.includes("appointment") || lower.includes("doctor") || lower.includes("dentist")) {
+    return { has_event: true, event_name: lower.includes("dentist") ? "Dentist Appointment" : "Doctor Appointment", start_time: dt.toISOString(), duration: 60, location: null, notes: messageText, confidence_score: 0.92 };
+  }
+  if (lower.includes("meeting") || lower.includes("zoom") || lower.includes("standup") || lower.includes("call at")) {
+    return { has_event: true, event_name: "Meeting", start_time: dt.toISOString(), duration: 30, location: null, notes: messageText, confidence_score: 0.85 };
+  }
+  if (lower.includes("dinner") || lower.includes("lunch") || lower.includes("coffee")) {
+    dt.setHours(lower.includes("lunch") ? 12 : lower.includes("coffee") ? 14 : 18, 0, 0, 0);
+    return { has_event: true, event_name: lower.includes("dinner") ? "Dinner" : lower.includes("lunch") ? "Lunch" : "Coffee", start_time: dt.toISOString(), duration: 90, location: null, notes: messageText, confidence_score: 0.82 };
+  }
+  if (lower.includes("medication") || lower.includes("pharmacy") || lower.includes("prescription")) {
+    return { has_event: true, event_name: "Medication Reminder", start_time: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0).toISOString(), duration: 5, location: null, notes: messageText, confidence_score: 0.88 };
+  }
+  if (lower.includes("deadline") || lower.includes("due") || lower.includes("submit")) {
+    return { has_event: true, event_name: "Deadline", start_time: new Date(now.getTime() + 86400000 * 2).toISOString(), duration: 60, location: null, notes: messageText, confidence_score: 0.80 };
+  }
+  const hasIntent = /\b(meet|schedule|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|event)\b/.test(lower);
   if (!hasIntent) return null;
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(10, 0, 0, 0);
-  return {
-    has_event: true,
-    event_name: "Event from message",
-    start_time: tomorrow.toISOString(),
-    duration: 60,
-    location: null,
-    notes: messageText,
-    confidence_score: 0.6,
-  };
+  return { has_event: true, event_name: "Event from message", start_time: dt.toISOString(), duration: 60, location: null, notes: messageText, confidence_score: 0.6 };
 }
 
 export async function analyzeMessageForIntent(
