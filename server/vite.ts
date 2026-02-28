@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export async function setupVite(app: Express) {
   const vite: ViteDevServer = await createViteServer({
     configFile: path.resolve(__dirname, "../vite.config.ts"),
-    server: { middlewareMode: true, hmr: true },
+    server: { middlewareMode: true, hmr: true, allowedHosts: true },
     appType: "spa",
   });
 
