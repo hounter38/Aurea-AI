@@ -14,11 +14,11 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        // Set your backend server URL here
-        // For emulator → host machine: http://10.0.2.2:5000
-        // For real device on same WiFi: http://YOUR_PC_IP:5000
-        // For production: https://your-deployed-server.com
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5000\"")
+        // ⚠️ CHANGE THIS to your computer's WiFi IP address before building!
+        // Find your IP: open Command Prompt → type "ipconfig" → look for IPv4 Address
+        // Example: if your IP is 192.168.1.121, set it to "http://192.168.1.121:5000"
+        // For emulator only: use "http://10.0.2.2:5000"
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.121:5000\"")
     }
 
     buildTypes {
