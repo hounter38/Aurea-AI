@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AureaSMS" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#C48B13</item>
+        <item name="colorPrimaryVariant">#A67510</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSecondary">#C48B13</item>
+        <item name="colorSecondaryVariant">#A67510</item>
+        <item name="colorOnSecondary">#000000</item>
+        <item name="android:statusBarColor">#0A0A0A</item>
+        <item name="android:navigationBarColor">#0A0A0A</item>
+        <item name="android:windowBackground">#0A0A0A</item>
+    </style>
+</resources>

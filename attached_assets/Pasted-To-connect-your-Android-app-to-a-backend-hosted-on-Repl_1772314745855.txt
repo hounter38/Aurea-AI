@@ -1,0 +1,49 @@
+To connect your Android app to a backend hosted on Replit, you'll need to update your app's connection settings and set up a listening "endpoint" on your Replit server.
+Since your Android app is already using AureaApiClient.kt, the "Messenger" part is mostly ready. Here is how to complete the bridge:
+1. The Replit Side (The "Brain")
+If you are using Node.js (Express) on Replit, your code should look like this to receive the data from your Samsung:
+JavaScript
+const express = require('express');
+const app = express();
+app.use(express.json()); // Essential for reading the JSON sent by the phone
+
+// This matches the endpoint in AureaApiClient.kt
+app.post('/api/sms/ingest', (req, res) => {
+    const { message, sender } = req.body;
+    console.log(`[SMS Received] From: ${sender}, Content: ${message}`);
+
+    // TODO: Add your AI logic here
+    
+    res.json({ 
+        processed: true, 
+        events_found: 1, 
+        status: "Event added to Aurea" 
+    });
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', mode: 'Replit Cloud' });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Aurea backend active on port ${PORT}`);
+});
+Show full code block
+2. The Android Side (The "Messenger")
+You need to point your app away from your local PC and toward your Replit URL.
+1.
+Open app/build.gradle.kts.
+2.
+Update the API_BASE_URL with your Replit URL (copy it from the top of the Replit window):
+Kotlin
+// Replace with your actual Replit URL
+buildConfigField("String", "API_BASE_URL", "\"https://your-project.your-username.repl.co\"")
+3. Key Adjustments for Replit
+•
+HTTPS is automatic: Since Replit uses https://, you don't strictly need the usesCleartextTraffic permission anymore, but it's fine to leave it in for future local testing.
+•
+The "Sleep" Issue: If your app fails to connect, it's likely because Replit went to sleep. You'll need to keep the Replit tab open or use a "Keep Alive" service (like UptimeRobot) to ping your /api/health URL every 5 minutes.
+•
+Permissions: Ensure your Samsung has both Internet and SMS permissions granted in the app settings (Settings > Apps > Aurea > Permissions).
+Next Step: If you provide your specific Replit URL, I can verify if the API_BASE_URL formatting is correct for you!
