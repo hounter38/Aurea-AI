@@ -1,11 +1,11 @@
-import { Router, type Request, type Response } from "express";
+import type { Express, Request, Response } from "express";
 import { extractEventsFromText, generateAiResponse, transcribeAudio } from "./aiEngine.js";
 import { createCalendarEvent, getAuthUrl, getUpcomingEvents, handleCallback } from "./googleCalendar.js";
 import type { IStorage } from "./storage.js";
 
 const AUTO_CONFIRM_THRESHOLD = 0.9;
 
-export function registerRoutes(router: Router, storage: IStorage) {
+export function registerRoutes(router: Express, storage: IStorage) {
   // Health
   router.get("/api/health", (_req: Request, res: Response) => {
     res.json({
