@@ -1,14 +1,19 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
 import * as schema from "@shared/schema";
 
-const { Pool } = pg;
+let db: any;
+let pool: any;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+if (process.env.DATABASE_URL) {
+  const { drizzle } = await import("drizzle-orm/node-postgres");
+  const pg = await import("pg");
+  const { Pool } = pg.default;
+  pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  db = drizzle(pool, { schema });
+  console.log("Using PostgreSQL database");
+} else {
+  console.log("DATABASE_URL not set — using in-memory storage");
+  db = null;
+  pool = null;
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+export { db, pool };

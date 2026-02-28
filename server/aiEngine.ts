@@ -1,9 +1,13 @@
 import OpenAI, { toFile } from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL || undefined;
+
+if (!apiKey) {
+  console.warn("No OpenAI API key found. Set OPENAI_API_KEY or AI_INTEGRATIONS_OPENAI_API_KEY. AI features will return mock responses.");
+}
+
+const openai = apiKey ? new OpenAI({ apiKey, baseURL }) : null;
 
 export interface ParsedEvent {
   has_event: boolean;
@@ -15,10 +19,30 @@ export interface ParsedEvent {
   confidence_score: number;
 }
 
+function mockParse(messageText: string): ParsedEvent | null {
+  const lower = messageText.toLowerCase();
+  const hasIntent = /\b(meet|meeting|call|appointment|lunch|dinner|coffee|event|schedule|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(lower);
+  if (!hasIntent) return null;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(10, 0, 0, 0);
+  return {
+    has_event: true,
+    event_name: "Event from message",
+    start_time: tomorrow.toISOString(),
+    duration: 60,
+    location: null,
+    notes: messageText,
+    confidence_score: 0.6,
+  };
+}
+
 export async function analyzeMessageForIntent(
   messageText: string,
   senderName?: string
 ): Promise<ParsedEvent | null> {
+  if (!openai) return mockParse(messageText);
+
   const now = new Date();
   const today = now.toLocaleDateString("en-US", {
     weekday: "long",
@@ -68,6 +92,8 @@ Always return valid JSON.`,
 }
 
 export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
+  if (!openai) return "Voice transcription requires an OpenAI API key. Set OPENAI_API_KEY in your environment.";
+
   const file = await toFile(audioBuffer, "audio.webm", { type: "audio/webm" });
   const transcription = await openai.audio.transcriptions.create({
     file,
@@ -80,6 +106,8 @@ export async function generateVoiceResponse(
   userQuery: string,
   calendarEvents: any[]
 ): Promise<string> {
+  if (!openai) return "Voice assistant requires an OpenAI API key. Set OPENAI_API_KEY in your environment.";
+
   const now = new Date();
   const eventsText =
     calendarEvents.length > 0

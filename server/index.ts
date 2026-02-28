@@ -75,14 +75,15 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
-    const { setupVite } = await import("./vite");
-    await setupVite(httpServer, app);
+    try {
+      const { setupVite } = await import("./vite");
+      await setupVite(httpServer, app);
+    } catch (e) {
+      console.warn("Vite setup failed (expected on Windows/non-Replit). API-only mode.", (e as Error).message);
+    }
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
