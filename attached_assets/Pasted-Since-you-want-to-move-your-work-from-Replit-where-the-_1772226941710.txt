@@ -1,0 +1,35 @@
+Since you want to move your work from **Replit** (where the "vibe" and initial logic were built) into **Cursor** (where you can actually handle the native Android SMS permissions), you need a comprehensive "Context Dump."
+
+Copy and paste the text below into your Replit Agent or Chat. This will force it to give you a clean, structured output of everything it has built so far so you can move it into Cursor.
+
+---
+
+### Copy/Paste this into Replit:
+
+> **"I am migrating this project to a local development environment using Cursor and Android Studio to handle native SMS permissions that Expo cannot support. Please provide a complete summary of the current project state so I can initialize it locally. I need:**
+> 1. **Architecture Overview:** A list of all technologies used (e.g., Node.js backend, React frontend, specific libraries).
+> 2. **The API Schema:** The exact endpoints, request headers, and JSON structures my backend expects for receiving SMS data and voice commands.
+> 3. **Environment Variables:** A list of all required `.env` keys (API keys, Database URLs, etc.)—do not show the secret values, just the keys.
+> 4. **Core Logic Snippets:** The 'brain' of the AI processing logic and the Google Calendar integration code.
+> 5. **Full File List:** A directory tree of the current project so I can recreate the folder structure.
+> 
+> 
+> **Please format this as a single, long-form technical specification that I can provide to another AI to rebuild this environment."**
+
+---
+
+### Once you have that info, here is how you "Vibe Code" it into Cursor:
+
+1. **Open Cursor** and create a new folder for your project.
+2. **Open the "Composer"** (Press `Cmd + I` or `Ctrl + I`).
+3. **Paste the Replit output** and add this instruction:
+> *"I am migrating my AI assistant, Aurea, from Replit to a native Android/Web hybrid. Using the technical specs above, please initialize the backend folder with the API logic and the frontend folder. Then, create a `native-android` folder using Kotlin that includes a Background Service to read incoming SMS and POST them to the `/sms-sync` endpoint defined in the specs."*
+
+
+
+### Why this works:
+
+* **Replit** is great at "sketching" the brain.
+* **Cursor** is the "builder" that will take that brain and actually hook up the wires to the Android system's SMS sensors.
+
+**Would you like me to help you refine the Kotlin code for that SMS Background Service once you get Cursor set up?**

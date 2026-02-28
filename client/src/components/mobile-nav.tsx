@@ -1,74 +1,58 @@
-import { useLocation, Link } from "wouter";
-import { LayoutDashboard, Inbox, CalendarDays, Mic, Settings, ListChecks } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { LayoutDashboard, MessageSquareText, CalendarCheck, Mic, Settings } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: LayoutDashboard },
-  { href: "/inbox", label: "Inbox", icon: Inbox },
-  { href: "/events", label: "Events", icon: ListChecks },
-  { href: "/voice", label: "Voice", icon: Mic },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/setup", label: "Setup", icon: Settings },
+const navItems = [
+  { title: "Home", url: "/", icon: LayoutDashboard },
+  { title: "Analyze", url: "/inbox", icon: MessageSquareText },
+  { title: "Events", url: "/events", icon: CalendarCheck },
+  { title: "Voice", url: "/voice", icon: Mic },
+  { title: "Setup", url: "/setup", icon: Settings },
 ];
 
 export function MobileNav() {
   const [location] = useLocation();
 
+  const { data: stats } = useQuery<{ pending: number }>({
+    queryKey: ["/api/stats"],
+    refetchInterval: 15000,
+  });
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
-      <div className="flex justify-around py-2">
-        {NAV_ITEMS.map((item) => {
-          const active = location === item.href;
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm safe-area-bottom" data-testid="nav-mobile">
+      <div className="flex items-center justify-around px-1 py-1">
+        {navItems.map((item) => {
+          const isActive = location === item.url;
           return (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.title} href={item.url}>
               <button
                 className={cn(
-                  "flex flex-col items-center gap-0.5 px-2 py-1 text-xs transition-colors",
-                  active ? "text-brand-500" : "text-muted-foreground"
+                  "relative flex flex-col items-center justify-center gap-0.5 rounded-md px-3 py-1.5 min-w-[3.5rem] transition-colors",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 )}
+                data-testid={`button-nav-${item.title.toLowerCase()}`}
               >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <div className="relative">
+                  <item.icon className="h-5 w-5" />
+                  {item.title === "Events" && stats && stats.pending > 0 && (
+                    <span className="absolute -top-1.5 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                      {stats.pending > 9 ? "9+" : stats.pending}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium leading-tight">{item.title}</span>
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-primary" />
+                )}
               </button>
             </Link>
           );
         })}
       </div>
     </nav>
-  );
-}
-
-export function Sidebar() {
-  const [location] = useLocation();
-
-  return (
-    <aside className="hidden md:flex w-64 flex-col border-r bg-card/50 p-4">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold">
-          <span className="text-brand-500">Aurea</span>
-        </h1>
-        <p className="text-xs text-muted-foreground">We remember so you don't have to</p>
-      </div>
-      <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => {
-          const active = location === item.href;
-          return (
-            <Link key={item.href} href={item.href}>
-              <button
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                  active
-                    ? "bg-brand-500/10 text-brand-500 font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
   );
 }

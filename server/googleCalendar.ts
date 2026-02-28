@@ -1,117 +1,116 @@
 import { google } from "googleapis";
 
-const SCOPES = ["https://www.googleapis.com/auth/calendar"];
+let connectionSettings: any;
 
-function getOAuth2Client() {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return null;
+async function getAccessToken() {
+  if (
+    connectionSettings &&
+    connectionSettings.settings.expires_at &&
+    new Date(connectionSettings.settings.expires_at).getTime() > Date.now()
+  ) {
+    return connectionSettings.settings.access_token;
+  }
 
-  return new google.auth.OAuth2(
-    clientId,
-    clientSecret,
-    process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/api/auth/google/callback"
-  );
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY
+    ? "repl " + process.env.REPL_IDENTITY
+    : process.env.WEB_REPL_RENEWAL
+    ? "depl " + process.env.WEB_REPL_RENEWAL
+    : null;
+
+  if (!xReplitToken) {
+    throw new Error("X-Replit-Token not found for repl/depl");
+  }
+
+  connectionSettings = await fetch(
+    "https://" +
+      hostname +
+      "/api/v2/connection?include_secrets=true&connector_names=google-calendar",
+    {
+      headers: {
+        Accept: "application/json",
+        "X-Replit-Token": xReplitToken,
+      },
+    }
+  )
+    .then((res) => res.json())
+    .then((data) => data.items?.[0]);
+
+  const accessToken =
+    connectionSettings?.settings?.access_token ||
+    connectionSettings.settings?.oauth?.credentials?.access_token;
+
+  if (!connectionSettings || !accessToken) {
+    throw new Error("Google Calendar not connected");
+  }
+  return accessToken;
 }
 
-export function getAuthUrl(): string | null {
-  const client = getOAuth2Client();
-  if (!client) return null;
-
-  return client.generateAuthUrl({
-    access_type: "offline",
-    scope: SCOPES,
-    prompt: "consent",
-  });
-}
-
-export async function handleCallback(code: string) {
-  const client = getOAuth2Client();
-  if (!client) throw new Error("Google OAuth not configured");
-  const { tokens } = await client.getToken(code);
-  return tokens;
+// WARNING: Never cache this client. Access tokens expire.
+export async function getUncachableGoogleCalendarClient() {
+  const accessToken = await getAccessToken();
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  return google.calendar({ version: "v3", auth: oauth2Client });
 }
 
 export async function createCalendarEvent(
-  title: string,
+  eventName: string,
   startTime: Date,
   durationMinutes: number,
-  description?: string,
-  location?: string
-): Promise<{ id: string; htmlLink: string; status: string }> {
-  const accessToken = process.env.GOOGLE_ACCESS_TOKEN;
+  location?: string | null,
+  notes?: string | null
+) {
+  const calendar = await getUncachableGoogleCalendarClient();
+  const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
 
-  if (!accessToken) {
-    return simulateCalendarEvent(title, startTime, durationMinutes);
-  }
+  const response = await calendar.events.insert({
+    calendarId: "primary",
+    requestBody: {
+      summary: eventName,
+      location: location ?? undefined,
+      description: notes ?? undefined,
+      start: { dateTime: startTime.toISOString() },
+      end: { dateTime: endTime.toISOString() },
+    },
+  });
 
-  try {
-    const client = getOAuth2Client();
-    if (!client) return simulateCalendarEvent(title, startTime, durationMinutes);
+  return response.data;
+}
 
-    client.setCredentials({
-      access_token: accessToken,
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-    });
-
-    const calendar = google.calendar({ version: "v3", auth: client });
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
-
-    const result = await calendar.events.insert({
-      calendarId: "primary",
-      requestBody: {
-        summary: title,
-        description: description || "",
-        location: location || undefined,
-        start: { dateTime: startTime.toISOString(), timeZone: "America/New_York" },
-        end: { dateTime: endTime.toISOString(), timeZone: "America/New_York" },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 15 }] },
-      },
-    });
-
-    return {
-      id: result.data.id || "",
-      htmlLink: result.data.htmlLink || "",
-      status: "created",
-    };
-  } catch (err) {
-    console.error("Google Calendar API error:", err);
-    return simulateCalendarEvent(title, startTime, durationMinutes);
-  }
+export async function deleteCalendarEvent(eventId: string) {
+  const calendar = await getUncachableGoogleCalendarClient();
+  await calendar.events.delete({ calendarId: "primary", eventId });
 }
 
 export async function getUpcomingEvents(maxResults = 20) {
-  const accessToken = process.env.GOOGLE_ACCESS_TOKEN;
-  if (!accessToken) return [];
+  const calendar = await getUncachableGoogleCalendarClient();
+  const now = new Date();
 
-  try {
-    const client = getOAuth2Client();
-    if (!client) return [];
+  const response = await calendar.events.list({
+    calendarId: "primary",
+    timeMin: now.toISOString(),
+    maxResults,
+    singleEvents: true,
+    orderBy: "startTime",
+  });
 
-    client.setCredentials({
-      access_token: accessToken,
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-    });
-
-    const calendar = google.calendar({ version: "v3", auth: client });
-    const result = await calendar.events.list({
-      calendarId: "primary",
-      timeMin: new Date().toISOString(),
-      maxResults,
-      singleEvents: true,
-      orderBy: "startTime",
-    });
-
-    return result.data.items || [];
-  } catch {
-    return [];
-  }
+  return response.data.items || [];
 }
 
-function simulateCalendarEvent(title: string, startTime: Date, durationMinutes: number) {
-  return {
-    id: `sim_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    htmlLink: `https://calendar.google.com/calendar/event?eid=demo`,
-    status: "simulated",
-  };
+export async function getTodayEvents() {
+  const calendar = await getUncachableGoogleCalendarClient();
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+
+  const response = await calendar.events.list({
+    calendarId: "primary",
+    timeMin: startOfDay.toISOString(),
+    timeMax: endOfDay.toISOString(),
+    singleEvents: true,
+    orderBy: "startTime",
+  });
+
+  return response.data.items || [];
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="aurea_gold">#C48B13</color>
+    <color name="aurea_dark">#0A0A0A</color>
+    <color name="aurea_card">#1A1A1A</color>
+    <color name="aurea_text">#FFFFFF</color>
+    <color name="aurea_muted">#888888</color>
+</resources>
