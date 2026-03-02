@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Download,
 } from "lucide-react";
+import { FibonacciSpiral } from "@/components/fibonacci-spiral";
 import { format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -123,13 +124,14 @@ export default function Inbox() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <MessageSquareText className="h-5 w-5 text-primary" />
+    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={180} opacity={0.04} />
+      <div className="relative z-10">
+        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-yellow-400">
+          <MessageSquareText className="h-5 w-5 text-yellow-400" />
           Analyze Message
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <p className="text-yellow-400/40 text-sm mt-1">
           Paste any message and Aurea will detect scheduling intent automatically.
         </p>
       </div>

@@ -6,20 +6,17 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.RECEIVE_MMS" />
-    <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".AureaApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Aurea SMS"
+        android:label="Aurea"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
@@ -38,7 +35,17 @@
             </intent-filter>
         </activity>
 
-        <!-- Required for default SMS app: responds to SMS delivery -->
+        <!-- SMS Receiver: fires on every incoming SMS (does NOT require being default SMS app) -->
+        <receiver
+            android:name=".receiver.SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Compose SMS Activity (optional, only used if set as default SMS app) -->
         <activity
             android:name=".ui.ComposeSmsActivity"
             android:exported="true">
@@ -54,17 +61,7 @@
             </intent-filter>
         </activity>
 
-        <!-- SMS Receiver: fires on every new SMS -->
-        <receiver
-            android:name=".receiver.SmsReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter android:priority="999">
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- MMS Receiver (required for default SMS app) -->
+        <!-- MMS Receiver (optional, only used if set as default SMS app) -->
         <receiver
             android:name=".receiver.MmsReceiver"
             android:exported="true"
@@ -75,7 +72,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- Headless SMS service (required for default SMS app) -->
+        <!-- Headless SMS service (optional, only used if set as default SMS app) -->
         <service
             android:name=".receiver.HeadlessSmsService"
             android:exported="true"

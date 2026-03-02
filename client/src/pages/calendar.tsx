@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, MapPin, Clock, RefreshCw } from "lucide-react";
+import { FibonacciSpiral } from "@/components/fibonacci-spiral";
 import { format, isToday, isTomorrow, isThisWeek } from "date-fns";
 import { Button } from "@/components/ui/button";
 
@@ -59,14 +60,15 @@ export default function Calendar() {
   const days = Object.keys(grouped).sort();
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6">
-      <div className="flex items-center justify-between gap-2">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={180} opacity={0.04} />
+      <div className="flex items-center justify-between gap-2 relative z-10">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
+          <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-yellow-400">
+            <CalendarDays className="h-5 w-5 text-yellow-400" />
             Calendar
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-yellow-400/40 text-sm mt-1">
             Upcoming events from your Google Calendar
           </p>
         </div>

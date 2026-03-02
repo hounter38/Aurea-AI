@@ -18,6 +18,7 @@ import {
   Download,
   CheckCheck,
 } from "lucide-react";
+import { FibonacciSpiral } from "@/components/fibonacci-spiral";
 import { format, formatDistanceToNow } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -286,14 +287,15 @@ export default function Events() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6">
-      <div className="flex items-start justify-between gap-3">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5 md:space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={180} opacity={0.04} />
+      <div className="flex items-start justify-between gap-3 relative z-10">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-            <CalendarCheck className="h-5 w-5 text-primary" />
+          <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-yellow-400">
+            <CalendarCheck className="h-5 w-5 text-yellow-400" />
             Events Queue
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-yellow-400/40 text-sm mt-1">
             Review, confirm, and manage all AI-detected events.
           </p>
         </div>

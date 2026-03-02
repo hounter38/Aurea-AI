@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Telephony
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,6 +33,10 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        private const val TAG = "AureaMainActivity"
+    }
+
     private lateinit var statusText: TextView
     private lateinit var serverStatusText: TextView
     private lateinit var todayCountText: TextView
@@ -41,12 +46,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyText: TextView
     private lateinit var warningCard: View
+    private lateinit var activeCard: View
 
-    private val requiredPermissions = arrayOf(
+    private val smsPermissions = arrayOf(
+        Manifest.permission.READ_SMS,
+        Manifest.permission.RECEIVE_SMS
+    )
+
+    private val allPermissions = arrayOf(
         Manifest.permission.READ_SMS,
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.SEND_SMS,
-        Manifest.permission.READ_CALL_LOG,
         Manifest.permission.READ_CONTACTS,
         Manifest.permission.READ_CALENDAR,
         Manifest.permission.WRITE_CALENDAR
@@ -55,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
+        Log.d(TAG, "Permission results: $results")
         updateUI()
     }
 
@@ -77,12 +88,18 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.eventLogRecycler)
         emptyText = findViewById(R.id.emptyText)
         warningCard = findViewById(R.id.warningCard)
+        activeCard = findViewById(R.id.activeCard)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        defaultSmsButton.setOnClickListener { requestDefaultSms() }
-        grantPermissionsButton.setOnClickListener { requestPermissions() }
+        defaultSmsButton.setOnClickListener { openAppSettings() }
+        grantPermissionsButton.setOnClickListener { requestAllPermissions() }
         scanNowButton.setOnClickListener { runManualScan() }
+
+        if (!hasSmsPermissions()) {
+            Log.d(TAG, "SMS permissions missing, requesting on launch")
+            requestAllPermissions()
+        }
 
         updateUI()
         checkServerConnection()
@@ -103,73 +120,72 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 if (healthy) {
                     serverStatusText.text = "Server: Connected"
-                    serverStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
+                    serverStatusText.setTextColor(0xFF4ADE80.toInt())
                 } else {
                     serverStatusText.text = "Server: Offline ($detail)"
-                    serverStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
+                    serverStatusText.setTextColor(0xFFEF4444.toInt())
                 }
             }
         }.start()
     }
 
-    private fun isDefaultSmsApp(): Boolean {
-        return Telephony.Sms.getDefaultSmsPackage(this) == packageName
-    }
-
-    private fun hasAllPermissions(): Boolean {
-        return requiredPermissions.all {
+    private fun hasSmsPermissions(): Boolean {
+        return smsPermissions.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
-    private fun requestDefaultSms() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val roleManager = getSystemService(RoleManager::class.java)
-            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
-                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
-                smsRoleLauncher.launch(intent)
-                return
-            }
+    private fun hasAllPermissions(): Boolean {
+        return allPermissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
-
-        val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-        startActivity(intent)
     }
 
-    private fun requestPermissions() {
-        val missing = requiredPermissions.filter {
+    private fun requestAllPermissions() {
+        val missing = allPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
 
         if (missing.isNotEmpty()) {
+            Log.d(TAG, "Requesting permissions: ${missing.joinToString()}")
             permissionLauncher.launch(missing)
         }
     }
 
-    private fun updateUI() {
-        val isDefault = isDefaultSmsApp()
-        val hasPerms = hasAllPermissions()
+    private fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$packageName")
+        }
+        startActivity(intent)
+    }
 
-        if (!isDefault) {
+    private fun updateUI() {
+        val hasSms = hasSmsPermissions()
+        val hasAll = hasAllPermissions()
+
+        Log.d(TAG, "updateUI: hasSms=$hasSms, hasAll=$hasAll")
+
+        if (!hasSms) {
             warningCard.visibility = View.VISIBLE
-            statusText.text = "Not set as default messaging app"
-            statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
-            defaultSmsButton.visibility = View.VISIBLE
-            grantPermissionsButton.visibility = View.GONE
-            scanNowButton.isEnabled = false
-        } else if (!hasPerms) {
-            warningCard.visibility = View.VISIBLE
-            statusText.text = "Permissions needed"
-            statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_dark))
+            activeCard.visibility = View.GONE
+            statusText.text = "Aurea needs SMS access to automatically detect events from your messages"
+            statusText.setTextColor(0xFFEF4444.toInt())
             defaultSmsButton.visibility = View.GONE
             grantPermissionsButton.visibility = View.VISIBLE
+            grantPermissionsButton.text = "Grant SMS Permissions"
             scanNowButton.isEnabled = false
+        } else if (!hasAll) {
+            warningCard.visibility = View.VISIBLE
+            activeCard.visibility = View.VISIBLE
+            statusText.text = "SMS listening is active! Grant remaining permissions for calendar and contacts."
+            statusText.setTextColor(0xFFFACC15.toInt())
+            defaultSmsButton.visibility = View.GONE
+            grantPermissionsButton.visibility = View.VISIBLE
+            grantPermissionsButton.text = "Grant Remaining Permissions"
+            scanNowButton.isEnabled = true
         } else {
             warningCard.visibility = View.GONE
-            statusText.text = "Active — scanning messages automatically"
-            statusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
-            defaultSmsButton.visibility = View.GONE
-            grantPermissionsButton.visibility = View.GONE
+            activeCard.visibility = View.VISIBLE
             scanNowButton.isEnabled = true
         }
 
@@ -188,8 +204,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runManualScan() {
+        if (!hasSmsPermissions()) {
+            requestAllPermissions()
+            return
+        }
+
         scanNowButton.isEnabled = false
         scanNowButton.text = "Scanning..."
+        Log.d(TAG, "Starting manual scan")
 
         Thread {
             try {
@@ -197,9 +219,13 @@ class MainActivity : AppCompatActivity() {
                 val dateFormat = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault())
                 val nowFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                 var found = 0
+                var forwarded = 0
 
                 for (msg in messages) {
                     if (EventLog.isProcessed(this, msg.id)) continue
+
+                    val sent = AureaApiClient.sendSms(this, msg.body, msg.sender)
+                    if (sent) forwarded++
 
                     val events = DateExtractor.extractEvents(msg.body, "SMS from ${msg.sender}")
 
@@ -229,24 +255,26 @@ class MainActivity : AppCompatActivity() {
                     EventLog.markProcessed(this, msg.id)
                 }
 
+                Log.d(TAG, "Scan complete: found=$found dates, forwarded=$forwarded messages")
+
                 runOnUiThread {
                     scanNowButton.isEnabled = true
                     scanNowButton.text = "Scan Now"
-                    todayCountText.text = "Scan complete — found $found new date${if (found != 1) "s" else ""}"
+                    todayCountText.text = "Scan done — $forwarded sent to AI, $found dates found locally"
                     updateUI()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Scan failed", e)
                 runOnUiThread {
                     scanNowButton.isEnabled = true
                     scanNowButton.text = "Scan Now"
                     statusText.text = "Scan failed: ${e.message}"
+                    statusText.setTextColor(0xFFEF4444.toInt())
                 }
             }
         }.start()
     }
 
-    // RecyclerView adapter for event log entries
     inner class EventLogAdapter(
         private val entries: List<EventLogEntry>
     ) : RecyclerView.Adapter<EventLogAdapter.ViewHolder>() {

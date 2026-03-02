@@ -15,6 +15,7 @@ import {
   MessageSquarePlus,
   Download,
 } from "lucide-react";
+import { FibonacciSpiral, FibDots } from "@/components/fibonacci-spiral";
 import { format, formatDistanceToNow } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -160,13 +161,14 @@ export default function Dashboard() {
   const pendingEvents = events?.filter((e) => e.status === "pending").slice(0, 3) || [];
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-5 md:space-y-6">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-5 md:space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={250} opacity={0.05} />
+      <div className="relative z-10">
+        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-yellow-400">
+          <Sparkles className="h-5 w-5 text-yellow-400" />
           Dashboard
         </h1>
-        <p className="text-muted-foreground text-sm mt-1 italic">
+        <p className="text-yellow-400/40 text-sm mt-1 italic">
           We remember so you don't have to
         </p>
       </div>

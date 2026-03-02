@@ -15,6 +15,7 @@ import Voice from "@/pages/voice";
 import Calendar from "@/pages/calendar";
 import Setup from "@/pages/setup";
 import { Sparkles } from "lucide-react";
+import { FibonacciSpiral } from "@/components/fibonacci-spiral";
 
 function Router() {
   return (
@@ -43,16 +44,17 @@ function App() {
           <div className="flex h-screen w-full">
             <AppSidebar />
             <div className="flex flex-col flex-1 overflow-hidden">
-              <header className="flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3 border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50" style={{ paddingTop: `max(0.625rem, env(safe-area-inset-top, 0px))` }}>
+              <header className="flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-3 border-b border-yellow-400/10 bg-black/95 backdrop-blur-sm sticky top-0 z-50 relative overflow-hidden" style={{ paddingTop: `max(0.625rem, env(safe-area-inset-top, 0px))` }}>
+                <FibonacciSpiral className="absolute right-0 top-1/2 -translate-y-1/2 opacity-30" size={80} />
                 <SidebarTrigger data-testid="button-sidebar-toggle" className="hidden md:flex" />
                 <div className="flex items-center gap-2 md:hidden">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-                    <Sparkles className="h-3.5 w-3.5 text-primary-foreground" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-yellow-400">
+                    <Sparkles className="h-3.5 w-3.5 text-black" />
                   </div>
-                  <span className="text-sm font-bold tracking-widest uppercase">Aurea</span>
+                  <span className="text-sm font-bold tracking-widest uppercase text-yellow-400">Aurea</span>
                 </div>
                 <div className="flex-1" />
-                <span className="text-xs text-muted-foreground italic hidden sm:inline">We remember so you don't have to</span>
+                <span className="text-xs text-yellow-400/50 italic hidden sm:inline relative z-10">We remember so you don't have to</span>
               </header>
               <main className="flex-1 overflow-auto pb-16 md:pb-0">
                 <Router />

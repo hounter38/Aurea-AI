@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Check, Smartphone, Zap, ArrowRight, ExternalLink, Shield } from "lucide-react";
+import { FibonacciSpiral } from "@/components/fibonacci-spiral";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Setup() {
@@ -21,10 +22,11 @@ export default function Setup() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight" data-testid="text-setup-title">Automation Setup</h1>
-        <p className="text-muted-foreground mt-1">Connect your phone's text messages to Aurea for automatic calendar event detection.</p>
+    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={180} opacity={0.04} />
+      <div className="relative z-10">
+        <h1 className="text-2xl font-bold tracking-tight text-yellow-400" data-testid="text-setup-title">Automation Setup</h1>
+        <p className="text-yellow-400/40 mt-1">Connect your phone's text messages to Aurea for automatic calendar event detection.</p>
       </div>
 
       <Card>

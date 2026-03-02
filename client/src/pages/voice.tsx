@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Sparkles, Volume2, AlertCircle, Loader2 } from "lucide-react";
+import { FibonacciSpiral, GoldenRing } from "@/components/fibonacci-spiral";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -85,26 +86,26 @@ export default function Voice() {
   const isProcessing = queryMutation.isPending;
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-5 md:space-y-6">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <Mic className="h-5 w-5 text-primary" />
+    <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-5 md:space-y-6 relative">
+      <FibonacciSpiral className="absolute top-0 right-0 -translate-y-4 translate-x-8" size={200} opacity={0.04} />
+      <div className="relative z-10">
+        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2 text-yellow-400">
+          <Mic className="h-5 w-5 text-yellow-400" />
           Voice Assistant
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <p className="text-yellow-400/40 text-sm mt-1">
           Ask Aurea about your schedule using your voice.
         </p>
       </div>
 
-      {/* Main mic interface */}
-      <Card>
-        <CardContent className="py-12 flex flex-col items-center gap-6">
-          {/* Animated mic button */}
+      <Card className="fib-glow">
+        <CardContent className="py-12 flex flex-col items-center gap-6 relative overflow-hidden">
+          <GoldenRing className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" size={200} />
           <div className="relative">
             {recording && (
               <>
-                <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping scale-150" />
-                <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping scale-125 delay-75" />
+                <div className="absolute inset-0 rounded-full bg-yellow-400/20 animate-ping scale-150" />
+                <div className="absolute inset-0 rounded-full bg-yellow-400/10 animate-ping scale-125 delay-75" />
               </>
             )}
             <button
@@ -117,7 +118,7 @@ export default function Voice() {
                   ? "bg-destructive text-destructive-foreground"
                   : isProcessing
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
-                  : "bg-primary text-primary-foreground hover:scale-105 active:scale-95"
+                  : "bg-yellow-400 text-black hover:scale-105 active:scale-95 hover:bg-yellow-300"
               )}
             >
               {isProcessing ? (
