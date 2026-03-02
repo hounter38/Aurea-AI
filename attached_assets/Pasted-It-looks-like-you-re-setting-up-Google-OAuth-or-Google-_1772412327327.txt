@@ -1,0 +1,35 @@
+It looks like you're setting up Google OAuth or Google Sign-In for your app and running into the "keytool is not recognized" error while trying to get your SHA-1 fingerprint.
+Since you are using Android Studio, you don't actually need to use the command line keytool to get your SHA-1. There is a much easier way directly in the IDE:
+1. Get your SHA-1 without keytool
+1.
+Open your project in Android Studio.
+2.
+Click on the Gradle tab on the far right edge of the window.
+3.
+Navigate to: AureaSMS > app > Tasks > android > signingReport.
+4.
+Double-click signingReport.
+5.
+Check the Run window at the bottom. You will see your SHA-1 and SHA-256 fingerprints listed there for both debug and release variants.
+2. Update your Network Security Config
+Your current network_security_config.xml is set up for local testing. If you are using a Replit URL (which is https), you don't strictly need cleartext, but your current config might be too restrictive for system certificates.
+I recommend updating your Aurea-AI-main/android-app/app/src/main/res/xml/network_security_config.xml to ensure it trusts user-added certificates (useful for debugging) and handles the Replit domain properly:
+Xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Emulator -->
+        <domain includeSubdomains="true">localhost</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
+3. Regarding the "Invalid Origin" in Google Console
+The error you're seeing in the Google Cloud Console ("Invalid Origin: URI must not be empty") happens because:
+•
+For Android apps: You should create an Android Client ID, not a "Web application" Client ID. When you select "Android", it will ask for your Package Name (com.aurea.sms) and your SHA-1 certificate fingerprint (the one you got from step 1).
+•
+For the Replit backend: If your backend needs to authenticate, you would use a "Web application" type. In the "Authorized JavaScript origins," use your Replit URL (e.g., https://your-project.replit.app).
+Are you seeing any specific error messages in Android Studio when you try to build (green hammer icon) or run the app? If so, please paste the error from the "Build" output tab.
