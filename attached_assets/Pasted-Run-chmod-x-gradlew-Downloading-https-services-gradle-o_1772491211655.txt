@@ -1,0 +1,55 @@
+Run chmod +x gradlew
+Downloading https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+
+Welcome to Gradle 8.11.1!
+
+Here are the highlights of this release:
+ - Parallel load and store for Configuration Cache
+ - Java compilation errors at the end of the build output
+ - Consolidated report for warnings and deprecations
+
+For more details see https://docs.gradle.org/8.11.1/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+e: file:///home/runner/work/Aurea-AI/Aurea-AI/android-app/settings.gradle.kts:8:1: Unresolved reference: dependencyResolution
+e: file:///home/runner/work/Aurea-AI/Aurea-AI/android-app/settings.gradle.kts:9:5: Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public fun Project.repositories(configuration: RepositoryHandler.() -> Unit): Unit defined in org.gradle.kotlin.dsl
+public fun ScriptHandler.repositories(configuration: RepositoryHandler.() -> Unit): Unit defined in org.gradle.kotlin.dsl
+e: file:///home/runner/work/Aurea-AI/Aurea-AI/android-app/settings.gradle.kts:10:9: Unresolved reference: google
+e: file:///home/runner/work/Aurea-AI/Aurea-AI/android-app/settings.gradle.kts:11:9: Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+public inline fun RepositoryHandler.mavenCentral(vararg args: Pair<String, Any?>): MavenArtifactRepository defined in org.gradle.kotlin.dsl
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Settings file '/home/runner/work/Aurea-AI/Aurea-AI/android-app/settings.gradle.kts' line: 8
+
+* What went wrong:
+Script compilation errors:
+
+  Line 08: dependencyResolution {
+           ^ Unresolved reference: dependencyResolution
+
+  Line 09:     repositories {
+               ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+                   public fun Project.repositories(configuration: RepositoryHandler.() -> Unit): Unit defined in org.gradle.kotlin.dsl
+                   public fun ScriptHandler.repositories(configuration: RepositoryHandler.() -> Unit): Unit defined in org.gradle.kotlin.dsl
+
+  Line 10:         google()
+                   ^ Unresolved reference: google
+
+  Line 11:         mavenCentral()
+                   ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: 
+                       public inline fun RepositoryHandler.mavenCentral(vararg args: Pair<String, Any?>): MavenArtifactRepository defined in org.gradle.kotlin.dsl
+
+4 errors
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 25s
+Error: Process completed with exit code 1.
