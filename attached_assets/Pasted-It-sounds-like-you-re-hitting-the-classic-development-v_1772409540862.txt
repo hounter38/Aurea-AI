@@ -1,0 +1,69 @@
+It sounds like you're hitting the classic "development vs. production" wall. Based on what you've shared—the **`keytool`** error and your recent work with **Replit** and **Android** apps—your connection issue is likely caused by one of three things: a missing security configuration, an unsigned app, or a simple pathing error in your terminal.
+
+Here is a guide to getting your app talking to your server.
+
+---
+
+## 1. Fix the `keytool` Error (The Foundation)
+
+You mentioned `keytool` is not recognized. This usually means your computer knows you have Java/Android tools installed, but it doesn't know where to find the specific "shortcut" to run them.
+
+* **The Quick Fix:** Instead of just typing `keytool`, use the **full path** in your terminal. It usually looks like this (wrapped in quotes because of the space):
+> `"C:\Program Files\Java\jdk-xx\bin\keytool.exe" -list -v ...`
+
+
+* **The Permanent Fix:** You need to add that `\bin` folder to your **System Environment Variables** (Path). Since you’re using updated Android software, look for the folder where your JDK is installed.
+
+---
+
+## 2. Enable "Cleartext" Traffic (The #1 Culprit)
+
+By default, modern Android apps (Android 9 and higher) **block** any connection that isn't `https://`. If your server is running on a local IP (like `http://192.168.x.x`) or doesn't have an SSL certificate, Android will silently kill the connection.
+
+**How to fix it:**
+
+1. Go to your app's `AndroidManifest.xml`.
+2. Find the `<application>` tag.
+3. Add this line inside the tag:
+`android:usesCleartextTraffic="true"`
+
+---
+
+## 3. Check Your Network Security Config
+
+If you want to be more professional (or if the step above doesn't work), you need a **Network Security Configuration** file. This tells the app specifically which "insecure" servers it's allowed to talk to.
+
+1. Create a file at `res/xml/network_security_config.xml`.
+2. Add your server's IP or domain:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">your.server.ip.here</domain>
+    </domain-config>
+</network-security-config>
+
+```
+
+3. Reference it in your `AndroidManifest.xml`:
+`android:networkSecurityConfig="@xml/network_security_config"`
+
+---
+
+## 4. Replit & Server Connection
+
+Since you were working with a **Replit repository update** recently, keep in mind:
+
+* **Public vs. Private:** If your Replit server is "Private," your app cannot connect to it via a standard URL unless you use an Auth Token.
+* **Wake Up:** Replit "reps" go to sleep after inactivity. If the server isn't "Always On," your app will get a "Connection Refused" error until you manually wake the Replit up by opening it in a browser.
+
+---
+
+### Troubleshooting Checklist:
+
+* [ ] **Internet Permission:** Does your `AndroidManifest.xml` have `<uses-permission android:name="android.permission.INTERNET" />`? (Simple, but easy to forget!)
+* [ ] **Localhost:** If you are using an emulator, `localhost` or `127.0.0.1` refers to the *phone*, not your computer. Use `10.0.2.2` to talk to your computer's local server.
+* [ ] **Firewall:** Is your PC's firewall blocking incoming connections on the port your server uses?
+
+**Would you like me to help you write the specific Network Security Config code for your server's IP?**

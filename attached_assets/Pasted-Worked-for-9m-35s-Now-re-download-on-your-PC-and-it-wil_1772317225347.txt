@@ -1,0 +1,85 @@
+Worked for 9m 35s
+Now re-download on your PC and it will work with zero setup — no PostgreSQL, no API keys needed:
+
+
+https://github.com/hounter38/Aurea-AI/archive/refs/heads/cursor/development-environment-setup-a82e.zip
+Extract it, then just two commands:
+
+
+cd C:\Users\ahmad\Downloads\Aurea-AI-cursor-development-environment-setup-a82e\Aurea-AI-cursor-development-environment-setup-a82e
+npm install
+npx tsx server/index.ts
+You should see:
+
+
+DATABASE_URL not set — using in-memory storage
+serving on port 5000
+Then open http://localhost:5000/api/health in your browser — it will show {"status":"ok"}. And the Android app will connect.
+
+I can't share actual secret values for security reasons, but I can tell you exactly what secrets exist on Replit and what you need to set up in Cursor. Let me check what's configured here:
+
+Loaded environment-secrets skill
+Here's the full picture. I can't expose or copy secret values (that's a security restriction), but I can tell you exactly what each one is and how to set them up in Cursor.
+
+On Replit (already configured - no action needed):
+
+Secret	What it is	Status
+DATABASE_URL	PostgreSQL connection string	Auto-managed by Replit
+PGDATABASE, PGHOST, PGPORT, PGUSER, PGPASSWORD	Individual DB credentials	Auto-managed by Replit
+AI_INTEGRATIONS_OPENAI_API_KEY	OpenAI API key	Set via Replit integration
+AI_INTEGRATIONS_OPENAI_BASE_URL	OpenAI proxy URL	Set via Replit integration
+SESSION_SECRET	Session encryption key	Already set
+REPLIT_DOMAINS, REPLIT_DEV_DOMAIN, REPL_ID	Replit platform vars	Auto-managed
+Everything here is already working. No changes needed on the Replit side.
+
+For Cursor / local development, you need to create a .env file with these values. Let me create an .env.example file in the repo that tells Cursor exactly what to set:
+
+Now let me push this update to GitHub:
+
+Done. Here's what you need to do on the Cursor side:
+
+Step 1: In your Cursor project folder, create a file called .env (just .env, no extension) and add:
+
+OPENAI_API_KEY=sk-your-actual-openai-key
+SESSION_SECRET=any-random-string-here
+That's the minimum to get AI features working. The app will use in-memory storage (no database needed), and Google Calendar sync will be skipped gracefully.
+
+Step 2 (optional, for full functionality): If you want a real database, add a DATABASE_URL line pointing to a free PostgreSQL service like Neon or Supabase.
+
+Where to get your OpenAI key:
+
+Go to platform.openai.com/api-keys
+Click "Create new secret key"
+Copy it and paste it as OPENAI_API_KEY in your .env file
+On Replit — everything is already configured and working. No changes needed here.
+
+The .env.example file is now in your GitHub repo with all the instructions. Cursor can read it and know exactly what secrets are needed.
+
+Thought for 5 seconds
+Good info from Gemini. The code I pushed already handles all of that — you don't need any API keys to get started. Everything falls back to demo mode.
+
+But let me make sure SESSION_SECRET also has a fallback so it doesn't crash:
+
+Grepped SESSION_SECRET in server
+Grepped session" in server
+No session usage in the server — so no SESSION_SECRET needed. The code I pushed already works with zero config. Just re-download and run:
+
+
+https://github.com/hounter38/Aurea-AI/archive/refs/heads/cursor/development-environment-setup-a82e.zip
+Then:
+
+
+cd C:\Users\ahmad\Downloads\Aurea-AI-cursor-development-environment-setup-a82e\Aurea-AI-cursor-development-environment-setup-a82e
+npm install
+npx tsx server/index.ts
+No .env file needed. It will show:
+
+
+DATABASE_URL not set — using in-memory storage
+serving on port 5000
+Then:
+
+Browser: http://localhost:5000/api/health → should show {"status":"ok"}
+Android app: should show "Server: Connected"
+Once that works, you can optionally add an .env file later with your OPENAI_API_KEY to get real AI analysis instead of the demo simulation.
+
