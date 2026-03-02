@@ -1,0 +1,66 @@
+Building a native Kotlin app into an APK **directly on an Android phone** is possible, but it requires a bit of a "hacker" setup because phones aren't naturally designed to compile professional software.
+
+Since you've had trouble with `keytool` and Java before, doing this on your phone actually solves that because we can set up a fresh environment that doesn't have your PC's old errors.
+
+### The "Termux" Method (Most Reliable)
+
+This is the only way to run the actual `./gradlew assembleDebug` command you saw in your notes, but directly on your phone.
+
+1. **Install Termux:** Download it from [F-Droid](https://f-droid.org/en/packages/com.termux/) (the Play Store version is outdated).
+2. **Set up the Build Tools:** Open Termux and paste these commands one by one (this installs the Java and Android tools you were missing on your PC):
+```bash
+pkg update && pkg upgrade
+pkg install openjdk-17 wget zip unzip
+
+```
+
+
+3. **Download your Project:**
+* If your code is on GitHub: `pkg install git && git clone [YOUR_REPO_URL]`
+* If it's just on your phone storage: Run `termux-setup-storage`, then `cp -r /sdcard/Download/your-project-folder .`
+
+
+4. **The "Magic" Build Command:**
+Navigate to your `android-app` folder and run:
+```bash
+chmod +x gradlew
+./gradlew assembleDebug
+
+```
+
+
+5. **Find your APK:** Once it finishes (it might take 5–10 minutes), your file will be at:
+`app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+### The "AIDE" Method (Easiest UI)
+
+If you don't like typing commands, there is an app called **AIDE-IDE for Android Java C++** (available on the Play Store).
+
+1. Download **AIDE**.
+2. Open your Kotlin project folder inside AIDE.
+3. It will recognize the Android project structure.
+4. Tap **Run** or **Build**. It will compile the code and immediately ask if you want to install the resulting APK.
+
+---
+
+### Why this is better for your SMS/Calendar project
+
+Since you specifically need to read **SMS** and write to **Google Calendar**:
+
+* **Real-time testing:** When you build the APK on your phone and install it, you can immediately test if the "Allow" permission pop-up appears.
+* **No Keytool Headache:** Both Termux and AIDE will generate a "Debug Key" automatically behind the scenes. You won't have to manually run `keytool` like you did on March 1st.
+
+### ⚠️ One final check for your code
+
+Before you build, make sure your `app/src/main/AndroidManifest.xml` has these specific lines, or the app will be "blind" to your texts:
+
+```xml
+<uses-permission android:name="android.permission.READ_SMS" />
+<uses-permission android:name="android.permission.READ_CALENDAR" />
+<uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+```
+
+**Would you like me to show you how to move that final APK file from the hidden Termux folder to your actual "Downloads" folder so you can install it?**

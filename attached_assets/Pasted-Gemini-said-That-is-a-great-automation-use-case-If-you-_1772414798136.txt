@@ -1,0 +1,42 @@
+Gemini said
+That is a great automation use case! If you are pulling data from SMS to populate a Google Calendar, you are dealing with two of the most "protected" areas of a phone.
+
+To make sure it doesn't fail this time, there are three specific hurdles you need to clear. Since you had the keytool error before, we're going to bypass your local PC and handle this inside the app's configuration itself.
+
+1. The "Manifest" Must Ask First
+Even if you manually go into your phone settings, the toggle for "SMS" won't even appear unless the app's code claims it needs it. In your Replit project (assuming it's a native/hybrid app and not just a website), you need to ensure these lines are in your AndroidManifest.xml file:
+
+XML
+<uses-permission android:name="android.permission.READ_SMS" />
+<uses-permission android:name="android.permission.RECEIVE_SMS" />
+2. The "Dangerous Permission" Hurdle
+Android classifies SMS and Calendar as "Dangerous Permissions." This means even if you have the lines above, the app must pop up a box asking the user (you) to click "Allow" while the app is running.
+
+If you are using JavaScript/React Native (which it sounds like you are, based on your previous mention of updated languages), you should have a block of code that looks like this:
+
+JavaScript
+import { PermissionsAndroid } from 'react-native';
+
+const requestSmsPermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_SMS,
+      {
+        title: "Calendar Sync Permission",
+        message: "This app needs access to your SMS to add events to Google Calendar.",
+        buttonPositive: "OK",
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("You can now read SMS");
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+3. Google Calendar API "Scope"
+Since you are pushing to Google Calendar, remember that Google has its own set of permissions (called Scopes).
+
+When you log in via the app, it must request the https://www.googleapis.com/auth/calendar.events scope.
+
+If you don't include this, the app might read the text message perfectly but then "crash" or give a 403 Forbidden error when trying to write to the calendar.
