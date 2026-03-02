@@ -25,6 +25,7 @@ import com.aurea.sms.helper.CalendarHelper
 import com.aurea.sms.helper.EventLog
 import com.aurea.sms.helper.EventLogEntry
 import com.aurea.sms.helper.SmsReader
+import com.aurea.sms.network.AureaApiClient
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,6 +33,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var statusText: TextView
+    private lateinit var serverStatusText: TextView
     private lateinit var todayCountText: TextView
     private lateinit var defaultSmsButton: Button
     private lateinit var grantPermissionsButton: Button
@@ -67,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         statusText = findViewById(R.id.statusText)
+        serverStatusText = findViewById(R.id.serverStatusText)
         todayCountText = findViewById(R.id.todayCountText)
         defaultSmsButton = findViewById(R.id.defaultSmsButton)
         grantPermissionsButton = findViewById(R.id.grantPermissionsButton)
@@ -82,11 +85,31 @@ class MainActivity : AppCompatActivity() {
         scanNowButton.setOnClickListener { runManualScan() }
 
         updateUI()
+        checkServerConnection()
     }
 
     override fun onResume() {
         super.onResume()
         updateUI()
+        checkServerConnection()
+    }
+
+    private fun checkServerConnection() {
+        serverStatusText.text = "Server: Checking..."
+        serverStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+
+        Thread {
+            val (healthy, detail) = AureaApiClient.checkHealth(this)
+            runOnUiThread {
+                if (healthy) {
+                    serverStatusText.text = "Server: Connected"
+                    serverStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark))
+                } else {
+                    serverStatusText.text = "Server: Offline ($detail)"
+                    serverStatusText.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
+                }
+            }
+        }.start()
     }
 
     private fun isDefaultSmsApp(): Boolean {

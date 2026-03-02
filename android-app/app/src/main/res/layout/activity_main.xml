@@ -49,6 +49,17 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Server Connection Status -->
+        <TextView
+            android:id="@+id/serverStatusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Server: Checking..."
+            android:textColor="#888888"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp" />
+
         <!-- Warning Card (shown when not default or missing permissions) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/warningCard"
