@@ -53,10 +53,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS
     )
 
-    private val allPermissions = arrayOf(
-        Manifest.permission.READ_SMS,
-        Manifest.permission.RECEIVE_SMS,
-        Manifest.permission.SEND_SMS,
+    private val extraPermissions = arrayOf(
         Manifest.permission.READ_CONTACTS,
         Manifest.permission.READ_CALENDAR,
         Manifest.permission.WRITE_CALENDAR
@@ -98,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
         if (!hasSmsPermissions()) {
             Log.d(TAG, "SMS permissions missing, requesting on launch")
-            requestAllPermissions()
+            requestSmsPermissions()
         }
 
         updateUI()
@@ -135,14 +132,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hasAllPermissions(): Boolean {
-        return allPermissions.all {
+    private fun hasExtraPermissions(): Boolean {
+        return extraPermissions.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
+    private fun requestSmsPermissions() {
+        val missing = smsPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
+        if (missing.isNotEmpty()) {
+            Log.d(TAG, "Requesting SMS permissions: ${missing.joinToString()}")
+            permissionLauncher.launch(missing)
+        }
+    }
+
     private fun requestAllPermissions() {
-        val missing = allPermissions.filter {
+        val allNeeded = smsPermissions + extraPermissions
+        val missing = allNeeded.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
 
@@ -161,9 +170,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI() {
         val hasSms = hasSmsPermissions()
-        val hasAll = hasAllPermissions()
+        val hasExtras = hasExtraPermissions()
 
-        Log.d(TAG, "updateUI: hasSms=$hasSms, hasAll=$hasAll")
+        Log.d(TAG, "updateUI: hasSms=$hasSms, hasExtras=$hasExtras")
 
         if (!hasSms) {
             warningCard.visibility = View.VISIBLE
@@ -174,14 +183,14 @@ class MainActivity : AppCompatActivity() {
             grantPermissionsButton.visibility = View.VISIBLE
             grantPermissionsButton.text = "Grant SMS Permissions"
             scanNowButton.isEnabled = false
-        } else if (!hasAll) {
+        } else if (!hasExtras) {
             warningCard.visibility = View.VISIBLE
             activeCard.visibility = View.VISIBLE
-            statusText.text = "SMS listening is active! Grant remaining permissions for calendar and contacts."
+            statusText.text = "SMS listening is active! Grant calendar and contacts access for full automation."
             statusText.setTextColor(0xFFFACC15.toInt())
             defaultSmsButton.visibility = View.GONE
             grantPermissionsButton.visibility = View.VISIBLE
-            grantPermissionsButton.text = "Grant Remaining Permissions"
+            grantPermissionsButton.text = "Grant Calendar & Contacts"
             scanNowButton.isEnabled = true
         } else {
             warningCard.visibility = View.GONE

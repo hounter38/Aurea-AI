@@ -115,4 +115,22 @@ shared/
 
 ## Theme
 
-Golden/amber brand (`#C48B13` primary) — reflecting "Aurea" (Latin for Golden), the Golden Ratio philosophy.
+Black & Yellow color scheme — pure black backgrounds (#0A0A0A) with bright yellow (#FACC15) accents. Fibonacci spiral SVG art elements appear as subtle decorative overlays on every page. The design reflects "Aurea" (Latin for Golden), the Golden Ratio philosophy.
+
+- **Primary color**: HSL 50 100% 50% (yellow-400)
+- **Background**: HSL 0 0% 4% (near-black)
+- **Cards**: HSL 0 0% 7% (very dark gray)
+- **Fibonacci art**: `client/src/components/fibonacci-spiral.tsx` — FibonacciSpiral, FibDots, GoldenRing SVG components
+
+## Android Companion App
+
+Native Kotlin Android app at `android-app/` — intercepts incoming SMS and forwards to the Replit backend for AI analysis.
+
+- **Package**: `com.aurea.sms`, minSdk 29
+- **Permissions**: READ_SMS + RECEIVE_SMS (requested on first launch), optional calendar/contacts
+- **Does NOT require being the default SMS app** — uses standard `SMS_RECEIVED` broadcast
+- **SmsReceiver**: Intercepts every incoming SMS in real-time, forwards to `/api/sms/ingest`
+- **ScanWorker**: Periodic WorkManager job (every 15 min) reads SMS history and forwards unprocessed messages
+- **Server status**: Live health check indicator on home screen
+- **Color scheme**: Matches web app — black background, yellow (#FACC15) accents
+- **Default Replit URL**: Baked into `AureaApiClient.kt`, configurable via SharedPreferences
