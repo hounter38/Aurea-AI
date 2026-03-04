@@ -4,6 +4,7 @@ import path from "path";
 import { storage } from "./storage";
 import { analyzeMessageForIntent, transcribeAudio, generateVoiceResponse } from "./aiEngine";
 import { createCalendarEvent, deleteCalendarEvent, getUpcomingEvents, getTodayEvents } from "./googleCalendar";
+import { encrypt, decrypt } from "./encryption";
 import { z } from "zod";
 import { createEvent } from "ics";
 
@@ -42,8 +43,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const autoConfirm = parsed.confidence_score >= 0.9;
 
       const event = await storage.createDetectedEvent({
-        messageText,
-        senderName: senderName || null,
+        messageText: encrypt(messageText),
+        senderName: senderName ? encrypt(senderName) : null,
         eventName: parsed.event_name,
         startTime: new Date(parsed.start_time),
         duration: parsed.duration || 60,
@@ -99,8 +100,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const autoConfirm = parsed.confidence_score >= 0.9;
 
       const event = await storage.createDetectedEvent({
-        messageText,
-        senderName: senderName || null,
+        messageText: encrypt(messageText),
+        senderName: senderName ? encrypt(senderName) : null,
         eventName: parsed.event_name,
         startTime: new Date(parsed.start_time),
         duration: parsed.duration || 60,
@@ -137,11 +138,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  function decryptEvent(event: any) {
+    return {
+      ...event,
+      messageText: decrypt(event.messageText),
+      senderName: event.senderName ? decrypt(event.senderName) : null,
+    };
+  }
+
   // --- Events ---
   app.get("/api/events", async (_req, res) => {
     try {
       const events = await storage.getAllDetectedEvents();
-      res.json(events);
+      res.json(events.map(decryptEvent));
     } catch (err) {
       console.error("Error fetching events:", err);
       res.status(500).json({ error: "Failed to fetch events" });
@@ -151,7 +160,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get("/api/events/pending", async (_req, res) => {
     try {
       const events = await storage.getPendingEvents();
-      res.json(events);
+      res.json(events.map(decryptEvent));
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch pending events" });
     }

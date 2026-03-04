@@ -134,3 +134,14 @@ Native Kotlin Android app at `android-app/` — intercepts incoming SMS and forw
 - **Server status**: Live health check indicator on home screen
 - **Color scheme**: Matches web app — black background, yellow (#FACC15) accents
 - **Default Replit URL**: Baked into `AureaApiClient.kt`, configurable via SharedPreferences
+- **Logging**: Sensitive SMS content is NOT logged; only byte count and status codes are logged
+
+## Data Security
+
+- **In transit**: All communication uses HTTPS (TLS encrypted)
+- **At rest**: SMS message text and sender phone numbers are encrypted with AES-256-GCM before database storage
+- **Encryption key**: Derived from SESSION_SECRET using scrypt key derivation
+- **Decryption**: Data is decrypted only when served to the frontend via API
+- **AI processing**: Full message text is sent to OpenAI over HTTPS for intent analysis; not permanently stored by OpenAI
+- **Non-scheduling messages**: Analyzed then discarded — no database record created
+- **Encryption module**: `server/encryption.ts` — uses AES-256-GCM with random IV and auth tag

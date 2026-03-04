@@ -56,7 +56,7 @@ object AureaApiClient {
                 put("sender", sender)
             }
 
-            Log.d(TAG, "Request body: $json")
+            Log.d(TAG, "Sending SMS data (${json.toString().length} bytes)")
 
             OutputStreamWriter(conn.outputStream).use { writer ->
                 writer.write(json.toString())
@@ -68,7 +68,7 @@ object AureaApiClient {
 
             if (responseCode in 200..299) {
                 val response = conn.inputStream.bufferedReader().readText()
-                Log.d(TAG, "SMS forwarded successfully: $response")
+                Log.d(TAG, "SMS forwarded successfully")
                 true
             } else {
                 val errorBody = try { conn.errorStream?.bufferedReader()?.readText() } catch (_: Exception) { null }
